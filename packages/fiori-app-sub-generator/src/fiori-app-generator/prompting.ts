@@ -28,7 +28,6 @@ import type {
     FioriAppGeneratorPromptSettings,
     Floorplan,
     Project,
-    PromptExtension,
     Service,
     YeomanUiStepConfig
 } from '../types';
@@ -90,7 +89,7 @@ type PromptUI5AppAnswersOptions = {
     promptSettings?: FioriAppGeneratorPromptSettings;
     hideUI5VersionPrompt?: boolean;
     floorplan: Floorplan;
-    promptExtension?: PromptExtension;
+    promptExtension?: UI5ApplicationPromptOptions;
 };
 
 /**
@@ -240,7 +239,7 @@ export async function createUI5ApplicationPromptOptions(
     projectName?: Project['name'],
     targetFolder?: Project['targetFolder'],
     promptSettings?: FioriAppGeneratorPromptSettings,
-    extensions?: PromptExtension
+    extensions?: UI5ApplicationPromptOptions
 ): Promise<UI5ApplicationPromptOptions> {
     // prompt settings may be additionally provided e.g. set by adaptors
     const ui5VersionPromptOptions: UI5ApplicationPromptOptions['ui5Version'] = {
@@ -272,8 +271,7 @@ export async function createUI5ApplicationPromptOptions(
         };
     }
     // Add more prompt options as required
-    const promptOptions = merge(
-        {
+    const preMergedPromptOpts: UI5ApplicationPromptOptions = {
             [ui5AppInquirerPromptNames.name]: {
                 defaultValue: projectName
             },
@@ -303,12 +301,16 @@ export async function createUI5ApplicationPromptOptions(
                 }
             },
             [ui5AppInquirerPromptNames.enableTypeScript]: {
-                defaultValue: defaultPromptValues[ui5AppInquirerPromptNames.enableTypeScript]
+                default: defaultPromptValues[ui5AppInquirerPromptNames.enableTypeScript]
             },
             [ui5AppInquirerPromptNames.enableVirtualEndpoints]: {
                 hide: service.capService?.capType === 'Java'
             }
-        } as UI5ApplicationPromptOptions,
+        }
+
+
+    const promptOptions: UI5ApplicationPromptOptions = merge(
+        preMergedPromptOpts,
         promptSettings as UI5ApplicationPromptOptions
     );
 

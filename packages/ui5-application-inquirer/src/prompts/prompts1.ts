@@ -184,7 +184,9 @@ export function getUI5VersionPrompt(
  * @param capCdsInfo CDS UI5 plugin information
  * @returns The `enableTypeScript` prompt
  */
-export function getEnableTypeScriptPrompt(capCdsInfo?: CdsUi5PluginInfo): UI5ApplicationQuestion {
+export function getEnableTypeScriptPrompt(
+    capCdsInfo?: CdsUi5PluginInfo
+): UI5ApplicationQuestion {
     return {
         when: (): boolean => {
             if (capCdsInfo) {

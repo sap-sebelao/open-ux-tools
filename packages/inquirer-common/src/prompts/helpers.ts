@@ -55,6 +55,25 @@ export function extendValidate<T extends Answers = Answers>(
 }
 
 /**
+ * Replaces the default function of a question with the one specified in prompt options or adds as new.
+ *
+ * @param question - the question to which the default function will be applied
+ * @param defaultFunc - the default function which will be applied to the question
+ * @param promptState - the runtime state of the prompts, this can be used to provide additional answers not defined by the prompt answers object
+ * @returns the extended default function
+ */
+export function applyDefaultFunction<T extends Answers = Answers>(
+    defaultFunc: Function,
+    promptState?: Answers
+): Question['default'] {
+    return (previousAnswers?: T): ReturnType<Question['default']> => {
+        // Allow non-prompt answer (derived answers) values to be passed to the validate function
+        const combinedAnswers = { ...cloneDeep(previousAnswers), ...cloneDeep(promptState) } as T;
+        return defaultFunc?.(combinedAnswers);
+    };
+}
+
+/**
  * Extend the existing prompt property function with the one specified in prompt options or add as new.
  *
  * @param question - the question to which the extending function will be applied
@@ -138,10 +157,22 @@ export function extendWithOptions<T extends YUIQuestion = YUIQuestion>(
                 if (extProp === 'validate' || extProp === 'additionalMessages') {
                     question = applyExtensionFunction(question, promptOpt as CommonPromptOptions, extProp, promptState);
                 }
-                // Provided defaults will override built in defaults
-                const defaultOverride = (promptOptions[promptOptKey] as PromptDefaultValue<string | boolean>).default;
-                if (defaultOverride) {
-                    question.default = defaultOverride;
+
+                // Apply `default` function options. These will override the default property of the question.
+                if (extProp === 'default') {
+                    if (typeof promptOptions[promptOptKey].default === 'function') {
+                        question.default = applyDefaultFunction(
+                            promptOptions[promptOptKey].default as Function,
+                            promptState
+                        );
+                    } else {
+                        // Provided defaults will override built in defaults, but only non-function defaults will be applied
+                        const defaultOverride = (promptOptions[promptOptKey] as PromptDefaultValue<string | boolean>)
+                            .default;
+                        if (defaultOverride) {
+                            question.default = defaultOverride;
+                        }
+                    }
                 }
             }
         }

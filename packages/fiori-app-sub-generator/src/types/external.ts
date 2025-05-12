@@ -6,7 +6,7 @@ import type { PromptSeverityMessage } from '@sap-ux/inquirer-common';
 import type { DeployConfig, FLPConfig } from '@sap-ux/fiori-generator-shared';
 import type { CapRuntime, EntityRelatedAnswers } from '@sap-ux/odata-service-inquirer';
 import { OdataVersion } from '@sap-ux/odata-service-inquirer';
-import { promptNames as ui5AppInquirerPromptNames } from '@sap-ux/ui5-application-inquirer';
+import { promptNames as ui5AppInquirerPromptNames, UI5ApplicationPromptOptions } from '@sap-ux/ui5-application-inquirer';
 import type { Answers, Question } from 'inquirer';
 import { LEGACY_CAP_TYPE_JAVA, LEGACY_CAP_TYPE_NODE } from './constants';
 import { type ALPOptions, type Project, type Service, type Floorplan, FloorplanFE, FloorplanFF } from './state';
@@ -206,16 +206,16 @@ export interface FioriGeneratorSettings {
  * todo: Include open source inquirer prompt options (UI5ApplicationInquirer prompt options) also so extensions can directly use them
  *
  */
-export type PromptExtension = {
+/* export type PromptExtension = {
     [key in ui5AppInquirerPromptNames]?: {
         validate?: Question['validate'];
         default?: Question['default'];
         additionalMessages?: PromptSeverityMessage;
     };
-};
+}; */
 
 export interface FioriGeneratorPromptExtension {
-    [generatorName: string]: PromptExtension;
+    [generatorName: string]: UI5ApplicationPromptOptions;
 }
 
 export interface ConditionalStep extends Step {

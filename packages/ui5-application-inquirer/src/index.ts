@@ -63,7 +63,7 @@ async function prompt(
     const answers = await adapter.prompt<UI5ApplicationAnswers>(ui5AppPrompts);
     // Apply default values to prompts in case they have not been executed
     if (promptOptions) {
-        const defaultAnswers = applyPromptOptionDefaults(answers, ui5AppPrompts, promptOptions, capCdsInfo);
+        const defaultAnswers = applyPromptOptionDefaults(answers, ui5AppPrompts, promptOptions);
         Object.assign(answers, defaultAnswers);
     }
 
@@ -83,8 +83,7 @@ async function prompt(
 function applyPromptOptionDefaults(
     answers: Partial<UI5ApplicationAnswers>,
     ui5AppPrompts: UI5ApplicationQuestion[],
-    promptOptions: UI5ApplicationPromptOptions,
-    capCdsInfo?: CdsUi5PluginInfo
+    promptOptions: UI5ApplicationPromptOptions
 ): Partial<UI5ApplicationAnswers> {
     const defaultAnswers: Partial<UI5ApplicationAnswers> = {};
     Object.entries(promptOptions).forEach(([key, promptOpt]) => {
@@ -92,8 +91,7 @@ function applyPromptOptionDefaults(
         // Do we have an answer, if not apply the default
         const defaultValueOrFunc = (promptOpt as PromptDefaultValue<string | boolean>).default;
 
-        // A prompt option for ui5Theme is not supported (as its dependant on the ui5Version) and is special cased
-        // `enableTypeScript` is dependent on the CdsUi5PluginInfo and is special cased
+        // A prompt option for ui5Theme is not supported (as its dependant on the ui5Version)
         if (
             isNil(answers[promptKey]) &&
             ((defaultValueOrFunc ?? promptKey === promptNames.ui5Theme) || promptOpt.advancedOption === true)
@@ -101,15 +99,6 @@ function applyPromptOptionDefaults(
             let defaultValue;
             if (promptKey === promptNames.ui5Theme) {
                 defaultValue = getDefaultUI5Theme(answers.ui5Version);
-            } else if (promptKey === promptNames.enableTypeScript) {
-                // TypeScript default value is dependent on the CdsUi5PluginInfo
-                const enableTypeScriptOpts = promptOpt as UI5ApplicationPromptOptions['enableTypeScript'];
-                // If an enableTypeScript default function is provided, use it to determine the default value
-                // otherwise override with the provided default value
-                defaultValue =
-                    typeof enableTypeScriptOpts?.default === 'function'
-                        ? enableTypeScriptOpts.default({ ...answers, capCdsInfo })
-                        : defaultValueOrFunc;
             } else if (defaultValueOrFunc !== undefined) {
                 defaultValue = getDefaultValue(answers, defaultValueOrFunc);
             } else if (promptOpt.advancedOption) {

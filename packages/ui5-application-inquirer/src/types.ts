@@ -93,7 +93,7 @@ type EnableTypeScriptPromptOptions = Omit<PromptDefaultValue<boolean>, 'default'
     /**
      * Callback function to determine the default value for TypeScript
      */
-    default?: (answers: UI5ApplicationAnswers & { capCdsInfo?: CdsUi5PluginInfo }) => boolean;
+    default?: boolean | ((answers: UI5ApplicationAnswers & { capCdsInfo?: CdsUi5PluginInfo }) => boolean);
 };
 
 type TargetFolderPromptOptions = {
