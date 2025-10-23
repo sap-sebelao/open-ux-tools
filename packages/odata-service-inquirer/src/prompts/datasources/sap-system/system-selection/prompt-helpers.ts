@@ -10,7 +10,7 @@ import {
 } from '@sap-ux/btp-utils';
 import { ERROR_TYPE } from '@sap-ux/inquirer-common';
 import type { OdataVersion } from '@sap-ux/odata-service-writer';
-import { type BackendSystemKey, type BackendSystem, SystemService } from '@sap-ux/store';
+import { BackendSystem, BackendSystemKey, SystemService } from '@sap-ux/store';
 import type { ListChoiceOptions } from 'inquirer';
 import { t } from '../../../../i18n';
 import type { ConnectedSystem, DestinationFilters } from '../../../../types';
@@ -27,9 +27,17 @@ export type NewSystemChoice = typeof NewSystemChoice;
 export const CfAbapEnvServiceChoice = 'cfAbapEnvService';
 export type CfAbapEnvServiceChoice = typeof CfAbapEnvServiceChoice;
 
+export type BackendSystemChoice = {
+    backendSystem: BackendSystem;
+    /**
+     * Indicates if credentials be updated
+     */
+    updateCredentials?: boolean;
+}
+
 export type SystemSelectionAnswerType = {
     type: 'destination' | 'backendSystem' | 'newSystemChoice' | CfAbapEnvServiceChoice;
-    system: Destination | BackendSystem | NewSystemChoice | CfAbapEnvServiceChoice;
+    system: Destination | BackendSystemChoice | NewSystemChoice | CfAbapEnvServiceChoice;
 };
 
 /**
@@ -43,7 +51,7 @@ export type SystemSelectionAnswerType = {
  * @returns the validation result of the backend system connection
  */
 export async function connectWithBackendSystem(
-    backendKey: BackendSystemKey,
+    backendSystemChoice: BackendSystemChoice,
     connectionValidator: ConnectionValidator,
     requiredOdataVersion?: OdataVersion,
     cachedConnectedSystem?: ConnectedSystem
@@ -51,6 +59,7 @@ export async function connectWithBackendSystem(
     // Create a new connection with the selected system
     PromptState.resetConnectedSystem();
     let connectValResult: ValidationResult = false;
+    const backendKey = BackendSystemKey.from(backendSystemChoice.backendSystem as BackendSystem) as BackendSystemKey;
     const backendSystem = await new SystemService(LoggerHelper.logger).read(backendKey);
 
     if (backendSystem) {
@@ -73,6 +82,8 @@ export async function connectWithBackendSystem(
             );
         } else if (backendSystem.authenticationType === 'basic' || !backendSystem.authenticationType) {
             let errorType;
+            backendSystemChoice.updateCredentials = !!backendSystem.password || !!backendSystem.username;
+
             ({ valResult: connectValResult, errorType } = await connectionValidator.validateAuth(
                 backendSystem.url,
                 backendSystem.username,
@@ -246,7 +257,9 @@ export async function createSystemChoices(
             return {
                 name: getBackendSystemDisplayName(system),
                 value: {
-                    system,
+                    system: {
+                        backendSystem: system
+                    },
                     type: 'backendSystem'
                 } as SystemSelectionAnswerType
             };
@@ -285,7 +298,7 @@ export function findDefaultSystemSelectionIndex(
             return (system as Destination).Name === defaultChoice;
         }
         if (systemType === 'backendSystem') {
-            return (system as BackendSystem).name === defaultChoice;
+            return (system as BackendSystemChoice).backendSystem.name === defaultChoice;
         }
         if (systemType === 'newSystemChoice') {
             return defaultChoice === NewSystemChoice;

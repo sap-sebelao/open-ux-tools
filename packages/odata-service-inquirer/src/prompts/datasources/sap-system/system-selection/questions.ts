@@ -19,6 +19,7 @@ import type { ServiceAnswer } from '../service-selection';
 import { getSystemServiceQuestion } from '../service-selection/questions';
 import { validateServiceUrl } from '../validators';
 import {
+    BackendSystemChoice,
     type SystemSelectionAnswerType,
     connectWithBackendSystem,
     connectWithDestination,
@@ -69,9 +70,8 @@ async function validateSystemSelection(
     let connectValResult: ValidationResult = false;
 
     if (systemSelection.type === 'backendSystem') {
-        const backendKey = BackendSystemKey.from(systemSelection.system as BackendSystem) as BackendSystemKey;
         connectValResult = await connectWithBackendSystem(
-            backendKey,
+            systemSelection.system as BackendSystemChoice,
             connectionValidator,
             requiredOdataVersion,
             cachedConnectedSystem
