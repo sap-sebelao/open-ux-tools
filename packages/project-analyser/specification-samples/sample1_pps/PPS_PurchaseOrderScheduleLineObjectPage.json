@@ -1,0 +1,14 @@
+{
+    "header": {
+        "editableHeaderContent": false,
+        "visible": true,
+        "sections": {},
+        "actions": {}
+    },
+    "footer": {
+        "actions": {}
+    },
+    "layout": {},
+    "sections": {},
+    "$schema": "../.schemas/ObjectPage_PPS_PurchaseOrderScheduleLineObjectPage.json"
+}

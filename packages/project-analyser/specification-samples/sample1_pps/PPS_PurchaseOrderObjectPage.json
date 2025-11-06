@@ -1,0 +1,335 @@
+{
+    "header": {
+        "editableHeaderContent": false,
+        "visible": true,
+        "sections": {
+            "@com.sap.vocabularies.UI.v1.FieldGroup#PurchaseOrderHeaderBox": {},
+            "@com.sap.vocabularies.UI.v1.DataPoint#DocumentStatus": {},
+            "@com.sap.vocabularies.UI.v1.DataPoint#NetOrderValue": {},
+            "_PurOrdDocumentTotal::@com.sap.vocabularies.UI.v1.Chart#PurOrdDocumentTotal": {},
+            "_PurOrdDocTotalOptional::@com.sap.vocabularies.UI.v1.Chart#PurOrdDocTotalOptional": {},
+            "@com.sap.vocabularies.UI.v1.DataPoint#PurchaseOrderHeaderVersion": {},
+            "_DocumentTotal::@com.sap.vocabularies.UI.v1.Chart#DocumentValueMicroChart": {},
+            "_OptionalDocumentTotal::@com.sap.vocabularies.UI.v1.PresentationVariant#OptionalValueMicroChart<@com.sap.vocabularies.UI.v1.Chart#OptionalValueMicroChart>": {}
+        },
+        "actions": {}
+    },
+    "footer": {
+        "actions": {
+            "saveInPreparation": {
+                "text": "{i18n>saveInPreparationBtnText}",
+                "press": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.onPressSaveInPreparation",
+                "visible": "{= ${ui>/isEditable} && ${PPSSaveInPreparationIsAllowed} === true}"
+            }
+        }
+    },
+    "layout": {},
+    "variantManagement": "Control",
+    "sections": {
+        "PurchaseOrderGeneralInformation": {
+            "subsections": {}
+        },
+        "DeliveryInvoice": {
+            "subsections": {}
+        },
+        "_PurchaseOrderItem::@com.sap.vocabularies.UI.v1.PresentationVariant<@com.sap.vocabularies.UI.v1.LineItem>": {
+            "table": {
+                "type": "TreeTable",
+                "creationMode": {
+                    "name": "Inline",
+                    "createInPlace": true
+                },
+                "enableFullScreen": true,
+                "condensedTableLayout": true,
+                "hierarchyQualifier": "I_PPS_PurchaseOrderItemHNRltn",
+                "widthIncludingColumnHeader": true,
+                "toolBar": {
+                    "actions": {
+                        "DeleteItem": {
+                            "requiresSelection": true,
+                            "text": "{i18n>deleteItemBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.ItemHierarchy.onPressDeleteItem",
+                            "enabled": ".extension.ismm.pps.purchaseorders1.ext.controller.ItemHierarchy.deleteItemIsEnabled"
+                        },
+                        "CreateItemsFromExternalCatalog": {
+                            "text": "{i18n>createItemsFromExternalCatalogBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.ItemHierarchy.onPressCreateItemsFromExternalCatalog",
+                            "visible": true,
+                            "enabled": true
+                        },
+                        "CreateService": {
+                            "text": "{i18n>createServiceBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.ItemHierarchy.onPressCreateService",
+                            "visible": true,
+                            "enabled": true
+                        },
+                        "CreateMaterial": {
+                            "text": "{i18n>createMaterialBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.ItemHierarchy.onPressCreateMaterial",
+                            "visible": true,
+                            "enabled": true
+                        },
+                        "CreateItemSet": {
+                            "text": "{i18n>createItemSetBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.ItemHierarchy.onPressCreateItemSet",
+                            "visible": true,
+                            "enabled": ".extension.ismm.pps.purchaseorders1.ext.controller.ItemHierarchy.createItemSetOrPrcgArngmntIsEnabled"
+                        },
+                        "CreateItem": {
+                            "text": "{i18n>createItemBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.ItemHierarchy.onPressCreateItem",
+                            "visible": true,
+                            "enabled": "{= ${__OperationControl/CreateItemWithProcessType}}"
+                        }
+                    }
+                }
+            }
+        },
+        "PartnersOverview": {
+            "subsections": {
+                "PartnersNovatedCollection": {
+                    "subsections": {}
+                },
+                "ItmPartnerNovatedCollection": {
+                    "subsections": {
+                        "_PurOrdItmNvtnPrtnRef::@com.sap.vocabularies.UI.v1.LineItem#NovatedItemPartner": {
+                            "table": {
+                                "type": "TreeTable",
+                                "hierarchyQualifier": "R_PPS_POItmNvtnPrtnRefHNRltn",
+                                "widthIncludingColumnHeader": true,
+                                "toolBar": {
+                                    "actions": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "PartnersHeaderCollection": {
+                    "subsections": {
+                        "_PurchaseOrderPartner::@com.sap.vocabularies.UI.v1.LineItem": {
+                            "table": {
+                                "creationMode": {
+                                    "name": "InlineCreationRows",
+                                    "inlineCreationRowsHiddenInEditMode": true
+                                },
+                                "widthIncludingColumnHeader": true,
+                                "toolBar": {
+                                    "actions": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "_PurOrdItmPrtnRefDraft::@com.sap.vocabularies.UI.v1.LineItem#ItemPartnerFunction": {
+                    "table": {
+                        "type": "TreeTable",
+                        "hierarchyQualifier": "R_PPS_POItmPrtnRefHNRltnDrft",
+                        "widthIncludingColumnHeader": true,
+                        "toolBar": {
+                            "actions": {
+                                "Refresh": {
+                                    "requiresSelection": false,
+                                    "text": "{i18n>refreshItemPartners}",
+                                    "press": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.onPressRefreshItemPartners",
+                                    "visible": "{= ${ui>/isEditable} }",
+                                    "enabled": "{= !${PurgDocHasActnRstrcn}}"
+                                }
+                            }
+                        }
+                    }
+                },
+                "_PurOrdItmPrtnRef::@com.sap.vocabularies.UI.v1.LineItem#ItemPartnerFunction": {
+                    "table": {
+                        "type": "TreeTable",
+                        "hierarchyQualifier": "R_PPS_PurOrdItmPrtnRefHNRltn",
+                        "widthIncludingColumnHeader": true,
+                        "toolBar": {
+                            "actions": {}
+                        }
+                    }
+                }
+            }
+        },
+        "_PurchaseOrderContact::@com.sap.vocabularies.UI.v1.LineItem#Contacts": {
+            "table": {
+                "creationMode": {
+                    "name": "InlineCreationRows",
+                    "inlineCreationRowsHiddenInEditMode": true
+                },
+                "toolBar": {
+                    "actions": {}
+                }
+            }
+        },
+        "_LegalTransactions::@com.sap.vocabularies.UI.v1.PresentationVariant<@com.sap.vocabularies.UI.v1.LineItem>": {
+            "table": {
+                "selectionMode": "Single",
+                "widthIncludingColumnHeader": true,
+                "toolBar": {
+                    "actions": {
+                        "CrteLglTransacFrmPurOrd": {
+                            "requiresSelection": false,
+                            "text": "{i18n>createLegalTransactionBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.onPressCreateLegalTransaction",
+                            "visible": "{= !${ui>/isEditable} }",
+                            "enabled": "{= !${ui>/isEditable} && !${CreateLegalTransacAndDocIsHdn} }"
+                        },
+                        "CreateLegalTransacAndDocument": {
+                            "position": {
+                                "placement": "After",
+                                "anchor": "CrteLglTransacFrmPurOrd"
+                            },
+                            "requiresSelection": false,
+                            "text": "{i18n>createLegalTransacAndDocumentBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.onPressCreateLegalTransacAndDocument",
+                            "visible": "{= !${ui>/isEditable} }",
+                            "enabled": "{= !${ui>/isEditable} && !${CreateLegalTransacAndDocIsHdn} }"
+                        },
+                        "CreateLegalDocument": {
+                            "position": {
+                                "placement": "After",
+                                "anchor": "CreateLegalTransacAndDocument"
+                            },
+                            "requiresSelection": true,
+                            "text": "{i18n>createLegalDocumentBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.onPressCreateLegalDocument",
+                            "visible": "{= !${ui>/isEditable} }",
+                            "enabled": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.createLegalDocumentIsEnabled"
+                        },
+                        "CreateLegalDocumentAmendment": {
+                            "position": {
+                                "placement": "After",
+                                "anchor": "CreateLegalDocument"
+                            },
+                            "requiresSelection": true,
+                            "text": "{i18n>createLegalDocumentAmendmentBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.onPressCreateLegalDocumentAmendment",
+                            "visible": "{= !${ui>/isEditable} }",
+                            "enabled": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.createLegalDocAmendmentIsEnabled"
+                        },
+                        "UpdtLglTransFrmPurOrd": {
+                            "position": {
+                                "placement": "After",
+                                "anchor": "CreateLegalDocumentAmendment"
+                            },
+                            "requiresSelection": false,
+                            "text": "{i18n>updateLegalTransactionBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.onPressUpdateLegalTransaction",
+                            "visible": "{= !${ui>/isEditable} }",
+                            "enabled": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.updateLegalTransactionIsEnabled"
+                        },
+                        "UpdateLegalDocumentAgreement": {
+                            "position": {
+                                "placement": "After",
+                                "anchor": "UpdtLglTransFrmPurOrd"
+                            },
+                            "requiresSelection": true,
+                            "text": "{i18n>updateLegalDocumentAgreementBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.onPressUpdateLegalDocumentAgreement",
+                            "visible": "{= !${ui>/isEditable} }",
+                            "enabled": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.updateLegalDocumentAgreementIsEnabled"
+                        },
+                        "AssignLinkdObjToLglTransExt": {
+                            "position": {
+                                "placement": "After",
+                                "anchor": "UpdateLegalDocumentAgreement"
+                            },
+                            "requiresSelection": false,
+                            "text": "{i18n>assignLegalTransactionBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.onPressAssignLegalTransaction",
+                            "visible": "{= !${ui>/isEditable} }",
+                            "enabled": true
+                        },
+                        "UnassignLinkdObjFrmLglTransExt": {
+                            "position": {
+                                "placement": "After",
+                                "anchor": "AssignLinkdObjToLglTransExt"
+                            },
+                            "requiresSelection": true,
+                            "text": "{i18n>unassignLegalTransactionBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.onPressUnassignLegalTransaction",
+                            "visible": "{= !${ui>/isEditable} }",
+                            "enabled": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.unassignLegalTransactionIsEnabled"
+                        }
+                    }
+                },
+                "columns": {
+                    "LglCntntMAgreementNameColumn": {
+                        "position": {
+                            "anchor": "LegalTransactionIsTriggerObj",
+                            "placement": "After"
+                        },
+                        "header": "{i18n>lglCntntMAgreementNameColumnText}",
+                        "template": "ismm.pps.purchaseorders1.ext.fragment.LglCntntMAgreementNameColumn"
+                    }
+                }
+            }
+        },
+        "SummaryCollectionFacet": {
+            "subsections": {
+                "ItemSummaryCollectionFacet": {
+                    "subsections": {
+                        "_ItemDocumentTotal::@com.sap.vocabularies.UI.v1.LineItem": {
+                            "table": {
+                                "type": "AnalyticalTable",
+                                "condensedTableLayout": true,
+                                "toolBar": {
+                                    "actions": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "BudgetOverviewCollectionFacet": {
+                    "subsections": {
+                        "_PurgDocBudgetOverview::@com.sap.vocabularies.UI.v1.PresentationVariant<@com.sap.vocabularies.UI.v1.LineItem>": {
+                            "table": {
+                                "type": "AnalyticalTable",
+                                "condensedTableLayout": true,
+                                "widthIncludingColumnHeader": true,
+                                "toolBar": {
+                                    "actions": {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "_PurOrdVersionHistory::@com.sap.vocabularies.UI.v1.PresentationVariant<@com.sap.vocabularies.UI.v1.LineItem>": {
+            "table": {
+                "selectionMode": "Auto",
+                "widthIncludingColumnHeader": true,
+                "toolBar": {
+                    "actions": {
+                        "Restore": {
+                            "requiresSelection": true,
+                            "text": "{i18n>restoreVersionBtnText}",
+                            "press": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.onPressRestoreVersion",
+                            "visible": "{= ${__OperationControl/RestoreVersion}}",
+                            "enabled": ".extension.ismm.pps.purchaseorders1.ext.controller.PPS_PurchaseOrderExtension.restoreVersionIsEnabled"
+                        }
+                    }
+                }
+            }
+        },
+        "HeaderBusinessWorkspace": {
+            "fragmentName": "ismm.pps.purchaseorders1.ext.fragment.HeaderBusinessWorkspace",
+            "relatedFacet": "AttachmentReuseComponentContainer",
+            "relativePosition": "After",
+            "title": "{i18n>businessWorkspace}",
+            "controls": {}
+        },
+        "AttachmentReuseComponentContainer": {
+            "relatedFacet": "HeaderBusinessWorkspace",
+            "relativePosition": "Before",
+            "title": "{i18n>attachments}"
+        },
+        "WorkflowReuseComponentContainer": {
+            "relatedFacet": "HeaderBusinessWorkspace",
+            "relativePosition": "After",
+            "title": "{{workflowComponentTitle}}"
+        }
+    },
+    "$schema": "../.schemas/ObjectPage_PPS_PurchaseOrderObjectPage.json"
+}

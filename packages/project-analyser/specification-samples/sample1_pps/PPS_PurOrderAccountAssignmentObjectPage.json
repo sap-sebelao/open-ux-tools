@@ -1,0 +1,32 @@
+{
+    "header": {
+        "editableHeaderContent": false,
+        "visible": true,
+        "sections": {
+            "@com.sap.vocabularies.UI.v1.DataPoint#tqUnfundedAcctAsgmt": {},
+            "_PurchaseOrderItem::@com.sap.vocabularies.UI.v1.DataPoint#AcctAssgmtUndistributedQty": {},
+            "_PurchaseOrderItem::@com.sap.vocabularies.UI.v1.DataPoint#AcctAssgmtUndistributedAmt": {},
+            "_PurchaseOrderItem::@com.sap.vocabularies.UI.v1.DataPoint#AcctAssgmtUndistributedPct": {}
+        },
+        "actions": {}
+    },
+    "footer": {
+        "actions": {}
+    },
+    "layout": {},
+    "sections": {
+        "idAccountingDistributionFacet": {
+            "subsections": {
+                "@com.sap.vocabularies.UI.v1.FieldGroup#tqAccountingDistribution": {
+                    "form": {
+                        "actions": {}
+                    }
+                }
+            }
+        },
+        "idAccountingInformationCollectionFacet": {
+            "subsections": {}
+        }
+    },
+    "$schema": "../.schemas/ObjectPage_PPS_PurOrderAccountAssignmentObjectPage.json"
+}

@@ -1,0 +1,13 @@
+{
+    "variantManagement": "Page",
+    "header": {
+        "actions": {}
+    },
+    "filterBar": {},
+    "table": {
+        "type": "GridTable",
+        "selectionMode": "Single",
+        "condensedTableLayout": true
+    },
+    "$schema": "../.schemas/ListReport_PPS_PurchaseOrderList.json"
+}

@@ -1,0 +1,158 @@
+{
+    "header": {
+        "editableHeaderContent": false,
+        "visible": true,
+        "sections": {
+            "@com.sap.vocabularies.UI.v1.FieldGroup#PurchaseOrderItemBox": {},
+            "@com.sap.vocabularies.UI.v1.DataPoint#ItemStatus": {},
+            "@com.sap.vocabularies.UI.v1.DataPoint#NetAmountData": {}
+        },
+        "actions": {}
+    },
+    "footer": {
+        "actions": {}
+    },
+    "layout": {},
+    "variantManagement": "Control",
+    "sections": {
+        "GeneralInformationCollectionFacet": {
+            "subsections": {}
+        },
+        "DeliveryAndInvoiceCollection": {
+            "subsections": {
+                "DeliveryAndInvoiceOverview": {
+                    "subsections": {}
+                },
+                "DeliveryAddressCollection": {
+                    "subsections": {}
+                },
+                "ProcessControlCollection": {
+                    "subsections": {}
+                },
+                "InvoiceProcessingCollection": {
+                    "subsections": {}
+                }
+            }
+        },
+        "PaymentPlanForm": {
+            "subsections": {
+                "PaymentPlanOverview": {
+                    "subsections": {}
+                },
+                "PaymentPlanItems": {
+                    "subsections": {
+                        "_PurOrdPaymentPlan::_PurOrdPaytPlanItmTP::@com.sap.vocabularies.UI.v1.LineItem#PaymentPlanItemField": {
+                            "table": {
+                                "type": "GridTable",
+                                "creationMode": {},
+                                "condensedTableLayout": true,
+                                "toolBar": {
+                                    "actions": {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "_PurchaseOrderScheduleLineTP::@com.sap.vocabularies.UI.v1.LineItem": {
+            "table": {
+                "creationMode": {},
+                "toolBar": {
+                    "actions": {}
+                }
+            }
+        },
+        "PartnersOverview": {
+            "subsections": {
+                "_PurOrdItemPartner::@com.sap.vocabularies.UI.v1.LineItem#ItemPartnerFunction": {
+                    "table": {
+                        "creationMode": {},
+                        "toolBar": {
+                            "actions": {}
+                        }
+                    }
+                },
+                "PartnersNovatedCollection": {
+                    "subsections": {}
+                }
+            }
+        },
+        "_PurOrdPricingElement::@com.sap.vocabularies.UI.v1.PresentationVariant<@com.sap.vocabularies.UI.v1.LineItem>": {
+            "table": {
+                "creationMode": {
+                    "name": "Inline"
+                },
+                "toolBar": {
+                    "actions": {}
+                }
+            }
+        },
+        "AccountAssignment": {
+            "subsections": {
+                "AccountAssignmentDataCollection": {
+                    "subsections": {}
+                },
+                "AccountingLinesCollection": {
+                    "subsections": {
+                        "_PurOrdAccountAssignment::@com.sap.vocabularies.UI.v1.PresentationVariant<@com.sap.vocabularies.UI.v1.LineItem>": {
+                            "table": {
+                                "type": "GridTable",
+                                "creationMode": {
+                                    "name": "InlineCreationRows"
+                                },
+                                "condensedTableLayout": true,
+                                "toolBar": {
+                                    "actions": {}
+                                },
+                                "columns": {
+                                    "DistributionBudgetPeriodColumn": {
+                                        "position": {
+                                            "anchor": "DataField::PPSBdgtPeriodValdtyEndDateCat",
+                                            "placement": "After"
+                                        },
+                                        "header": "{metaModel>/PPS_PurOrderAccountAssignment/ValidityEndDate@com.sap.vocabularies.Common.v1.Label}",
+                                        "template": "ismm.pps.purchaseorders1.ext.fragment.DistributionBudgetPeriodColumn",
+                                        "availability": "Adaption",
+                                        "properties": [
+                                            "ValidityEndDate",
+                                            "ValidityEndDateIsHdn"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "FundsRequestCollection": {
+                    "subsections": {}
+                }
+            }
+        },
+        "SupplierConfirmations": {
+            "subsections": {
+                "SupConfDataCollection": {
+                    "subsections": {}
+                },
+                "SupConfLinesCollection": {
+                    "subsections": {}
+                }
+            }
+        },
+        "ItemBusinessWorkspace": {
+            "fragmentName": "ismm.pps.purchaseorders1.ext.fragment.ItemBusinessWorkspace",
+            "relatedFacet": "NotesSection",
+            "relativePosition": "After",
+            "title": "{i18n>businessWorkspace}",
+            "controls": {}
+        },
+        "BusinessProcessFlow": {
+            "fragmentName": "ismm.pps.purchaseorders1.ext.fragment.BusinessProcessFlow",
+            "relatedFacet": "SupplierConfirmations",
+            "relativePosition": "After",
+            "title": "{i18n>processFlow}",
+            "controls": {}
+        }
+    },
+    "$schema": "../.schemas/ObjectPage_PPS_PurchaseOrderItemObjectPage.json"
+}
