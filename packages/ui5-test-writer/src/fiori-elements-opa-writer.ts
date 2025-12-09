@@ -3,21 +3,24 @@ import { create as createStorage } from 'mem-fs';
 import type { Editor } from 'mem-fs-editor';
 import { create } from 'mem-fs-editor';
 import type { Manifest } from '@sap-ux/project-access';
-import type { FEV4OPAConfig, FEV4OPAPageConfig, FEV4ManifestTarget } from './types';
+import type {
+    FEV4OPAConfig,
+    FEV4OPAPageConfig,
+    FEV4ManifestTarget,
+    FEV4OpaJourneyConfig,
+    LROPPageConfigs
+} from './types';
 import { SupportedPageTypes, ValidationError } from './types';
 import { t } from './i18n';
 import {
     FileName,
     DirName,
-    getListReportPage,
-    getObjectPages,
     getSpecification,
     getFilterFields,
     createApplicationAccess,
     getTableColumns
 } from '@sap-ux/project-access';
-import pageModel from './sampleListReportModel.json';
-import { Logger } from '@sap-ux/logger/src/types';
+import type { Logger } from '@sap-ux/logger/src/types';
 
 /**
  * Reads the manifest for an app.
@@ -86,15 +89,25 @@ function getAppFromManifest(manifest: Manifest, forcedAppID?: string): { appID: 
     return { appID, appPath };
 }
 
+function getPageModel(targetKey: string, appSpec: any) {
+    return appSpec.applicationModel.pages[targetKey];
+}
+
 /**
  * Create the page configuration object from the app descriptor and the target key.
  *
  * @param manifest - the app descriptor of the app
  * @param targetKey - the key of the target in the manifest
+ * @param appSpec - the application specification
  * @param forcedAppID - the appID in case we don't want to read it from the manifest
  * @returns Page configuration object, or undefined if the target type is not supported
  */
-function createPageConfig(manifest: Manifest, targetKey: string, forcedAppID?: string): FEV4OPAPageConfig | undefined {
+function createPageConfig(
+    manifest: Manifest,
+    targetKey: string,
+    appSpec?: any,
+    forcedAppID?: string
+): FEV4OPAPageConfig | undefined {
     const appTargets = manifest['sap.ui5']?.routing?.targets;
     const target = appTargets && (appTargets[targetKey] as FEV4ManifestTarget);
     const { appID, appPath } = getAppFromManifest(manifest, forcedAppID);
@@ -112,7 +125,8 @@ function createPageConfig(manifest: Manifest, targetKey: string, forcedAppID?: s
             targetKey,
             componentID: target.id,
             template: SupportedPageTypes[target.name],
-            isStartup: false
+            isStartup: false,
+            pageModel: appSpec ? getPageModel(targetKey, appSpec) : undefined
         };
 
         if (target.options.settings.contextPath) {
@@ -127,9 +141,73 @@ function createPageConfig(manifest: Manifest, targetKey: string, forcedAppID?: s
 }
 
 /**
+ * Create the journey parameters object for ListReport Template.
+ *
+ * @param pageConfig - page config object
+ * @returns - journey parameters object
+ */
+function getListReportJourneyParameters(pageConfig: FEV4OPAPageConfig): FEV4OpaJourneyConfig {
+    let filterBarItems: string[] = [];
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        filterBarItems = getFilterFields(pageConfig.pageModel as { root: any });
+    } catch (error) {
+        // If anything goes wrong, we just don't add filter bar items
+    }
+
+    let tableColumns: Record<string, any> = {};
+    try {
+        const columnAggregations = getTableColumns(pageConfig.pageModel as { root: any });
+        tableColumns = transformTableColumns(columnAggregations);
+    } catch (error) {
+        // no columns
+    }
+
+    return {
+        journeyFileName: pageConfig.targetKey + 'Journey',
+        journeyFileTemplate: 'ListReportJourney',
+        templateParams: {
+            pageName: pageConfig.targetKey,
+            targetOP: (pageConfig.pageModel.navigation?.[pageConfig.pageModel.entitySet]?.target as string) ?? '',
+            filterBarItems,
+            tableColumns
+        }
+    };
+}
+
+/**
+ * Create the journey parameters object for ObjectPage Template.
+ *
+ * @param pageConfig - page config object
+ * @returns - journey parameters object
+ */
+function getObjectPageJourneyParameters(pageConfig: FEV4OPAPageConfig): FEV4OpaJourneyConfig {
+    return {
+        journeyFileName: pageConfig.targetKey + 'Journey',
+        journeyFileTemplate: 'ObjectPageJourney',
+        templateParams: {
+            pageName: pageConfig.targetKey
+        }
+    };
+}
+
+/**
+ * Create the journey configuration object from the ux specification model and the page name.
+ *
+ * @param pageConfig - page config object
+ * @returns - journey parameters object
+ */
+function getJourneyConfig(pageConfig: FEV4OPAPageConfig): FEV4OpaJourneyConfig {
+    return pageConfig.template === 'ListReport'
+        ? getListReportJourneyParameters(pageConfig)
+        : getObjectPageJourneyParameters(pageConfig);
+}
+
+/**
  * Create the configuration object from the app descriptor.
  *
  * @param manifest - the app descriptor of the target app
+ * @param appSpec - the application specification
  * @param opaConfig - parameters for the generation
  * @param opaConfig.scriptName - the name of the OPA journey file. If not specified, 'FirstJourney' will be used
  * @param opaConfig.htmlTarget - the name of the html file that will be used in the OPA journey file. If not specified, 'index.html' will be used
@@ -139,6 +217,7 @@ function createPageConfig(manifest: Manifest, targetKey: string, forcedAppID?: s
  */
 function createConfig(
     manifest: Manifest,
+    appSpec: any,
     opaConfig: { scriptName?: string; appID?: string; htmlTarget?: string },
     hideFilterBar: boolean
 ): FEV4OPAConfig {
@@ -168,7 +247,7 @@ function createConfig(
     // Create page configurations in supported cases
     const appTargets = manifest['sap.ui5']?.routing?.targets;
     for (const targetKey in appTargets) {
-        const pageConfig = createPageConfig(manifest, targetKey, opaConfig.appID);
+        const pageConfig = createPageConfig(manifest, targetKey, appSpec, opaConfig.appID);
         if (pageConfig) {
             pageConfig.isStartup = startupTargets.includes(targetKey);
             config.pages.push(pageConfig);
@@ -185,10 +264,7 @@ function createConfig(
  * @param manifest - the app descriptor of the target app
  * @returns the page fonfigs for the LR and the OP if they're found
  */
-function findLROP(
-    pages: FEV4OPAPageConfig[],
-    manifest: Manifest
-): { pageLR?: FEV4OPAPageConfig; pageOP?: FEV4OPAPageConfig } {
+function findLROP(pages: FEV4OPAPageConfig[], manifest: Manifest): LROPPageConfigs {
     const pageLR = pages.find((page) => {
         return page.isStartup && page.template === 'ListReport';
     });
@@ -262,6 +338,31 @@ function writePageObject(
     );
 }
 
+/**
+ * Writes a journey object in a mem-fs-editor.
+ *
+ * @param journeyConfig - the journey configuration object
+ * @param rootTemplateDirPath  - template root directory
+ * @param testOutDirPath - output test directory (.../webapp/test)
+ * @param fs - a reference to a mem-fs editor
+ */
+function writeJourneyObject(
+    journeyConfig: FEV4OpaJourneyConfig,
+    rootTemplateDirPath: string,
+    testOutDirPath: string,
+    fs: Editor
+) {
+    fs.copyTpl(
+        join(rootTemplateDirPath, `integration/${journeyConfig.journeyFileTemplate}.js`),
+        join(testOutDirPath, `integration/${journeyConfig.journeyFileName}.js`),
+        journeyConfig.templateParams,
+        undefined,
+        {
+            globOptions: { dot: true }
+        }
+    );
+}
+
 function getColumnIdentifier(column: {
     custom: boolean;
     schema: { keys: { name: string; value: string }[] };
@@ -306,8 +407,6 @@ export async function generateOPAFiles(
     const manifest = readManifest(editor, basePath);
     const { applicationType, hideFilterBar } = getAppTypeAndHideFilterBarFromManifest(manifest);
 
-    const config = createConfig(manifest, opaConfig, hideFilterBar);
-
     const rootCommonTemplateDirPath = join(__dirname, '../templates/common');
     const rootV4TemplateDirPath = join(__dirname, `../templates/${applicationType}`); // Only v4 is supported for the time being
     const testOutDirPath = join(basePath, 'webapp/test');
@@ -316,10 +415,8 @@ export async function generateOPAFiles(
     // readApp calls createApplicationAccess internally if given a path, but it uses the "live" version of project-access without fs enhancement
     const editorAppAccess = await createApplicationAccess(basePath, { fs: editor });
     const appSpec = await specification.readApp({ app: editorAppAccess, fs: editor });
-    // pageModel based on description https://github.wdf.sap.corp/ux-engineering/tools-suite/issues/36325, needs to be confirmed/changed
-    // get pages
-    const listReportPage = getListReportPage(appSpec.applicationModel.pages);
-    // const objectPages = getObjectPages(appSpec.applicationModel.pages);
+
+    const config = createConfig(manifest, appSpec, opaConfig, hideFilterBar);
 
     // Common test files
     editor.copyTpl(
@@ -347,46 +444,12 @@ export async function generateOPAFiles(
     // Pages files (one for each page in the app)
     config.pages.forEach((page) => {
         writePageObject(page, rootV4TemplateDirPath, testOutDirPath, editor);
+        const journeyConfig = getJourneyConfig(page);
+        writeJourneyObject(journeyConfig, rootV4TemplateDirPath, testOutDirPath, editor);
     });
 
-    // OPA Journey file
-    const startPages = config.pages.filter((page) => page.isStartup).map((page) => page.targetKey);
-    const LROP = findLROP(config.pages, manifest);
-    let filterBarItems: string[] = [];
-    try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        filterBarItems = getFilterFields(listReportPage.model as { root: any });
-    } catch (error) {
-        // If anything goes wrong, we just don't add filter bar items
-    }
-    log?.error(`Filter bar items for OPA tests: ${JSON.stringify(filterBarItems)}`);
+    log?.info(`Generated pages & journeys (count: ${config.pages.length})`);
 
-    let tableColumns: Record<string, any> = {};
-    try {
-        const columnAggregations = getTableColumns(listReportPage.model as { root: any });
-        tableColumns = transformTableColumns(columnAggregations);
-    } catch (error) {
-        // no columns
-    }
-
-    const journeyParams = {
-        startPages,
-        startLR: LROP.pageLR?.targetKey,
-        navigatedOP: LROP.pageOP?.targetKey,
-        hideFilterBar: config.hideFilterBar,
-        filterBarItems: filterBarItems,
-        tableColumns: tableColumns
-    };
-
-    editor.copyTpl(
-        join(rootV4TemplateDirPath, 'integration/FirstJourney.js'),
-        join(testOutDirPath, `integration/${config.opaJourneyFileName}.js`),
-        journeyParams,
-        undefined,
-        {
-            globOptions: { dot: true }
-        }
-    );
     // Journey Runner
     editor.copyTpl(
         join(rootV4TemplateDirPath, 'integration', 'pages', 'JourneyRunner.js'),
@@ -422,7 +485,7 @@ export function generatePageObjectFile(
     const manifest = readManifest(editor, basePath);
     const { applicationType } = getAppTypeAndHideFilterBarFromManifest(manifest);
 
-    const pageConfig = createPageConfig(manifest, pageObjectParameters.targetKey, pageObjectParameters.appID);
+    const pageConfig = createPageConfig(manifest, pageObjectParameters.targetKey, {}, pageObjectParameters.appID);
     if (pageConfig) {
         const rootTemplateDirPath = join(__dirname, `../templates/${applicationType}`); // Only v4 is supported for the time being
         const testOutDirPath = join(basePath, 'webapp/test');

@@ -13,6 +13,31 @@ export type FEV4OPAPageConfig = {
     contextPath?: string;
     targetKey: string;
     isStartup: boolean;
+    pageModel?: any;
+};
+
+export type ColumnMap = Record<
+    string,
+    {
+        header?: string;
+    }
+>;
+
+export type ListReportJourneyTemplateParams = {
+    pageName: string;
+    targetOP: string;
+    filterBarItems: string[];
+    tableColumns: ColumnMap;
+};
+
+export type ObjectPageJourneyTemplateParams = {
+    pageName: string;
+};
+
+export type FEV4OpaJourneyConfig = {
+    journeyFileName: string;
+    journeyFileTemplate?: string;
+    templateParams?: Record<string, any>;
 };
 
 export type FEV4OPAConfig = {
@@ -72,3 +97,8 @@ export interface FFOPAConfig {
     ui5Version?: string;
     ui5Theme?: string;
 }
+
+export type LROPPageConfigs = {
+    pageLR?: FEV4OPAPageConfig;
+    pageOP?: FEV4OPAPageConfig;
+};
